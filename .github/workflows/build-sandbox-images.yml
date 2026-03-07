@@ -1,0 +1,69 @@
+name: Build and Publish OpenClaw Sandbox Images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * 1"
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/build-sandbox-images.yml
+  pull_request:
+    paths:
+      - .github/workflows/build-sandbox-images.yml
+
+jobs:
+  sandbox-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - name: openclaw-sandbox
+            script: ./scripts/sandbox-setup.sh
+            local_tag: openclaw-sandbox:bookworm-slim
+            remote_tag: ghcr.io/renierm26/openclaw-sandbox:bookworm-slim
+          - name: openclaw-sandbox-common
+            script: ./scripts/sandbox-common-setup.sh
+            local_tag: openclaw-sandbox-common:bookworm-slim
+            remote_tag: ghcr.io/renierm26/openclaw-sandbox-common:bookworm-slim
+          - name: openclaw-sandbox-browser
+            script: ./scripts/sandbox-browser-setup.sh
+            local_tag: openclaw-sandbox-browser:bookworm-slim
+            remote_tag: ghcr.io/renierm26/openclaw-sandbox-browser:bookworm-slim
+
+    steps:
+      - name: Clone upstream OpenClaw
+        run: |
+          git clone --depth 1 https://github.com/openclaw/openclaw.git upstream-openclaw
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: renierm26
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build sandbox image
+        working-directory: ./upstream-openclaw
+        run: |
+          chmod +x "${{ matrix.image.script }}"
+          "${{ matrix.image.script }}"
+
+      - name: Retag image
+        run: |
+          docker tag "${{ matrix.image.local_tag }}" "${{ matrix.image.remote_tag }}"
+
+      - name: Push image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push "${{ matrix.image.remote_tag }}"
