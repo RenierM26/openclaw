@@ -1,6 +1,7 @@
 FROM ghcr.io/openclaw/openclaw:latest
 
 USER root
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       docker.io \
@@ -10,6 +11,12 @@ RUN apt-get update && \
       ffmpeg \
       ripgrep \
       build-essential \
+      python3 \
+      python3-pip \
+      python3-venv \
+      python3-dev \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PIP_NO_CACHE_DIR=1
 
 USER node
