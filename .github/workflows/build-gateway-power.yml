@@ -10,34 +10,52 @@ on:
     paths:
       - Dockerfile.gateway-power
       - .github/workflows/build-gateway-power.yml
+  pull_request:
+    paths:
+      - Dockerfile.gateway-power
+      - .github/workflows/build-gateway-power.yml
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Set variables
+      - name: Set image variables
         run: |
           echo "IMAGE_NAME=ghcr.io/renierm26/openclaw-gateway-power" >> $GITHUB_ENV
           echo "DATE_TAG=$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: renierm26
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Build (PR validation only)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile.gateway-power
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build and push
+      - name: Build and Push
+        if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -47,3 +65,5 @@ jobs:
           tags: |
             ghcr.io/renierm26/openclaw-gateway-power:latest
             ghcr.io/renierm26/openclaw-gateway-power:${{ env.DATE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
