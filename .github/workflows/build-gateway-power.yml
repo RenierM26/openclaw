@@ -1,0 +1,49 @@
+name: Build and Publish OpenClaw Gateway Power Image
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile.gateway-power
+      - .github/workflows/build-gateway-power.yml
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        run: |
+          echo "IMAGE_NAME=ghcr.io/renierm26/openclaw-gateway-power" >> $GITHUB_ENV
+          echo "DATE_TAG=$(date +'%Y.%m.%d')-${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: renierm26
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.gateway-power
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ env.DATE_TAG }}
