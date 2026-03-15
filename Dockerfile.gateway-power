@@ -4,6 +4,8 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_NO_CACHE_DIR=1
+ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
+ENV PATH="${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -34,8 +36,12 @@ RUN apt-get update && \
       python3-pip \
       python3-venv \
       python3-dev \
-      android-sdk-platform-tools \
     && ln -sf /usr/bin/fdfind /usr/local/bin/fd \
+    && mkdir -p /opt/android \
+    && wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip \
+    && unzip -q /tmp/platform-tools.zip -d /opt/android \
+    && ln -sf /opt/android/platform-tools/adb /usr/local/bin/adb \
+    && ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot \
     && pip3 install --break-system-packages \
       uv \
       frida-tools \
@@ -46,6 +52,6 @@ RUN apt-get update && \
       rich \
       tenacity \
       pyyaml \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/platform-tools.zip
 
 USER node
