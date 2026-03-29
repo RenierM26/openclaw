@@ -41,6 +41,14 @@ RUN apt-get update && \
       expect \
       python-is-python3 \
       ca-certificates \
+      procps \
+      lsof \
+      iproute2 \
+      mtr-tiny \
+      nmap \
+      ethtool \
+      xmlstarlet \
+      nano \
     && ln -sf /usr/bin/fdfind /usr/local/bin/fd \
     && mkdir -p /opt/android \
     && wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip \
