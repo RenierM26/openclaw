@@ -36,6 +36,11 @@ RUN apt-get update && \
       python3-pip \
       python3-venv \
       python3-dev \
+      openssh-client \
+      sshpass \
+      expect \
+      python-is-python3 \
+      ca-certificates \
     && ln -sf /usr/bin/fdfind /usr/local/bin/fd \
     && mkdir -p /opt/android \
     && wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip \
