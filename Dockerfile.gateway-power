@@ -55,6 +55,7 @@ RUN apt-get update && \
     && unzip -q /tmp/platform-tools.zip -d /opt/android \
     && ln -sf /opt/android/platform-tools/adb /usr/local/bin/adb \
     && ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot \
+    && npm install -g @tobilu/qmd
     && pip3 install --break-system-packages \
       uv \
       frida-tools \
