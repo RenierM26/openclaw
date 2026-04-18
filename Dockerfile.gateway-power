@@ -7,7 +7,9 @@ ENV PIP_NO_CACHE_DIR=1
 ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
 ENV PATH="${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
-RUN apt-get update && \
+RUN set -eux; \
+    echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
       docker.io \
       git \
@@ -49,6 +51,12 @@ RUN apt-get update && \
       ethtool \
       xmlstarlet \
       nano \
+    && apt-get install -y --no-install-recommends -t trixie \
+    mesa-vulkan-drivers \
+    vulkan-tools \
+    libvulkan-dev \
+    libgl1-mesa-dri \
+    glslc \
     && ln -sf /usr/bin/fdfind /usr/local/bin/fd \
     && mkdir -p /opt/android \
     && wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip \
