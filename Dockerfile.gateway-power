@@ -5,7 +5,6 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_NO_CACHE_DIR=1
 ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
-ENV NPM_CONFIG_PREFIX=/home/node/.openclaw/.npm-global
 ENV PATH="${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
 RUN set -eux; \
