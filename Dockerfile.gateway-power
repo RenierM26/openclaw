@@ -5,7 +5,8 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_NO_CACHE_DIR=1
 ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
-ENV PATH="${ANDROID_PLATFORM_TOOLS}:${PATH}"
+ENV WHISPER_VENV=/opt/whisper-venv
+ENV PATH="${WHISPER_VENV}/bin:${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
 RUN set -eux; \
     echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
@@ -63,8 +64,10 @@ RUN set -eux; \
     && unzip -q /tmp/platform-tools.zip -d /opt/android \
     && ln -sf /opt/android/platform-tools/adb /usr/local/bin/adb \
     && ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot \
-    && npm install -g @tobilu/qmd \
-    && npm install -g mcporter \
+    && npm install -g \
+      @tobilu/qmd \
+      mcporter \
+      wacli \
     && chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd \
     && pip3 install --break-system-packages \
       uv \
@@ -76,6 +79,10 @@ RUN set -eux; \
       rich \
       tenacity \
       pyyaml \
+    && python3 -m venv "${WHISPER_VENV}" \
+    && "${WHISPER_VENV}/bin/pip" install --upgrade pip setuptools wheel \
+    && "${WHISPER_VENV}/bin/pip" install openai-whisper \
+    && ln -sf "${WHISPER_VENV}/bin/whisper" /usr/local/bin/whisper \
     && rm -rf /var/lib/apt/lists/* /tmp/platform-tools.zip
 
 USER node
