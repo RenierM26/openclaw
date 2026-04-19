@@ -64,6 +64,7 @@ RUN set -eux; \
     && ln -sf /opt/android/platform-tools/adb /usr/local/bin/adb \
     && ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot \
     && npm install -g @tobilu/qmd \
+    && npm install -g mcporter \
     && chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd \
     && pip3 install --break-system-packages \
       uv \
