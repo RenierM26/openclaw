@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_NO_CACHE_DIR=1
 ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
 ENV NPM_CONFIG_PREFIX=/home/node/.openclaw/.npm-global
-ENV PATH="/home/node/.openclaw/.npm-global/bin:${ANDROID_PLATFORM_TOOLS}:${PATH}"
+ENV PATH="${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
 RUN set -eux; \
     echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
@@ -77,8 +77,6 @@ RUN set -eux; \
       rich \
       tenacity \
       pyyaml \
-    && mkdir -p /home/node/.openclaw/.npm-global; \
-    && chown -R node:node /home/node/.openclaw; \
     && rm -rf /var/lib/apt/lists/* /tmp/platform-tools.zip
 
 USER node
