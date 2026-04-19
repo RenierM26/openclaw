@@ -5,77 +5,79 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_NO_CACHE_DIR=1
 ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
-ENV PATH="${ANDROID_PLATFORM_TOOLS}:${PATH}"
+ENV NPM_CONFIG_PREFIX=/home/node/.openclaw/.npm-global
+ENV PATH="/home/node/.openclaw/.npm-global/bin:${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
 RUN set -eux; \
-    echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-      docker.io \
-      git \
-      curl \
-      wget \
-      jq \
-      ffmpeg \
-      ripgrep \
-      fd-find \
-      fzf \
-      rsync \
-      zip \
-      unzip \
-      sqlite3 \
-      netcat-openbsd \
-      dnsutils \
-      iputils-ping \
-      traceroute \
-      tcpdump \
-      tshark \
-      usbutils \
-      build-essential \
-      cmake \
-      pkg-config \
-      python3 \
-      python3-pip \
-      python3-venv \
-      python3-dev \
-      openssh-client \
-      sshpass \
-      expect \
-      python-is-python3 \
-      ca-certificates \
-      procps \
-      lsof \
-      iproute2 \
-      mtr-tiny \
-      nmap \
-      ethtool \
-      xmlstarlet \
-      nano \
-    && apt-get install -y --no-install-recommends -t trixie \
+  echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    docker.io \
+    git \
+    curl \
+    wget \
+    jq \
+    ffmpeg \
+    ripgrep \
+    fd-find \
+    fzf \
+    rsync \
+    zip \
+    unzip \
+    sqlite3 \
+    netcat-openbsd \
+    dnsutils \
+    iputils-ping \
+    traceroute \
+    tcpdump \
+    tshark \
+    usbutils \
+    build-essential \
+    cmake \
+    pkg-config \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3-dev \
+    openssh-client \
+    sshpass \
+    expect \
+    python-is-python3 \
+    ca-certificates \
+    procps \
+    lsof \
+    iproute2 \
+    mtr-tiny \
+    nmap \
+    ethtool \
+    xmlstarlet \
+    nano; \
+  apt-get install -y --no-install-recommends -t trixie \
     mesa-vulkan-drivers \
     vulkan-tools \
     libvulkan-dev \
     libgl1-mesa-dri \
-    glslc \
-    && ln -sf /usr/bin/fdfind /usr/local/bin/fd \
-    && mkdir -p /opt/android \
-    && wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip \
-    && unzip -q /tmp/platform-tools.zip -d /opt/android \
-    && ln -sf /opt/android/platform-tools/adb /usr/local/bin/adb \
-    && ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot \
-    && npm install -g @tobilu/qmd \
-    && npm install -g mcporter \
-    && chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd \
-    && pip3 install --break-system-packages \
-      uv \
-      frida-tools \
-      requests \
-      httpx \
-      python-dotenv \
-      msal \
-      rich \
-      tenacity \
-      pyyaml \
-    && rm -rf /var/lib/apt/lists/* /tmp/platform-tools.zip
+    glslc; \
+  ln -sf /usr/bin/fdfind /usr/local/bin/fd; \
+  mkdir -p /opt/android; \
+  wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip; \
+  unzip -q /tmp/platform-tools.zip -d /opt/android; \
+  ln -sf /opt/android/platform-tools/adb /usr/local/bin/adb; \
+  ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot; \
+  npm install -g @tobilu/qmd mcporter; \
+  chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd; \
+  pip3 install --break-system-packages \
+    uv \
+    frida-tools \
+    requests \
+    httpx \
+    python-dotenv \
+    msal \
+    rich \
+    tenacity \
+    pyyaml; \
+  mkdir -p /home/node/.openclaw/.npm-global; \
+  chown -R node:node /home/node/.openclaw; \
+  rm -rf /var/lib/apt/lists/* /tmp/platform-tools.zip
 
 USER node
