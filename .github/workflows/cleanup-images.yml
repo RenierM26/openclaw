@@ -1,0 +1,32 @@
+name: Cleanup OpenClaw GHCR Images
+
+on:
+  schedule:
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - openclaw-gateway-power
+          - openclaw-sandbox
+          - openclaw-sandbox-common
+          - openclaw-sandbox-browser
+
+    steps:
+      - name: Delete old untagged package versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ matrix.package }}
+          package-type: container
+          min-versions-to-keep: 5
+          delete-only-untagged-versions: true
