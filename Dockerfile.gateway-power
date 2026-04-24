@@ -115,7 +115,17 @@ RUN set -eux; \
     "${WHISPER_VENV}/bin/pip" install openai-whisper; \
     ln -sf "${WHISPER_VENV}/bin/whisper" /usr/local/bin/whisper
 
-# 7) Smoke checks
+# 7) Playwright Chromium for OpenClaw browser automation
+RUN set -eux; \
+    mkdir -p /home/node/.cache/ms-playwright; \
+    PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright \
+      node /app/node_modules/playwright-core/cli.js install --with-deps chromium; \
+    chromium_path="$(find /home/node/.cache/ms-playwright -path '*/chrome-linux64/chrome' -type f | head -n1)"; \
+    test -n "$chromium_path"; \
+    ln -sf "$chromium_path" /usr/local/bin/openclaw-chromium; \
+    chown -R node:node /home/node/.cache/ms-playwright
+
+# 8) Smoke checks
 RUN set -eux; \
     docker --version; \
     gh --version; \
@@ -123,5 +133,6 @@ RUN set -eux; \
     mcporter --version; \
     whisper --help >/dev/null; \
     adb version
+    openclaw-chromium --version
 
 USER node
