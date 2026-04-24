@@ -132,7 +132,7 @@ RUN set -eux; \
     qmd --version; \
     mcporter --version; \
     whisper --help >/dev/null; \
-    adb version
+    adb version; \
     openclaw-chromium --version
 
 USER node
