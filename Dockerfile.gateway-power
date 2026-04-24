@@ -52,8 +52,8 @@ RUN set -eux; \
       nmap \
       ethtool \
       xmlstarlet \
-      nano \
-      github-cli; \
+      github-cli \
+      nano; \
     apt-get install -y --no-install-recommends -t trixie \
       mesa-vulkan-drivers \
       vulkan-tools \
