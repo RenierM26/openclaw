@@ -52,7 +52,8 @@ RUN set -eux; \
       nmap \
       ethtool \
       xmlstarlet \
-      nano; \
+      nano \
+      github-cli; \
     apt-get install -y --no-install-recommends -t trixie \
       mesa-vulkan-drivers \
       vulkan-tools \
@@ -73,7 +74,7 @@ RUN set -eux; \
 
 # 3) npm globals
 RUN set -eux; \
-    npm install -g @tobilu/qmd mcporter; \
+    npm install -g @tobilu/qmd mcporter @openai/codex; \
     chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd
 
 # 4) system Python helpers
