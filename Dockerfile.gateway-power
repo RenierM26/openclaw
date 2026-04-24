@@ -8,9 +8,21 @@ ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
 ENV WHISPER_VENV=/opt/whisper-venv
 ENV PATH="${WHISPER_VENV}/bin:${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
-# 1) APT sources + base OS packages
+# 1) APT sources: Debian Trixie for Mesa/Vulkan + official GitHub CLI repo
 RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg; \
     echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
+    mkdir -p -m 755 /etc/apt/keyrings; \
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
+    chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      > /etc/apt/sources.list.d/github-cli.list; \
+    rm -rf /var/lib/apt/lists/*
+
+# 2) Base OS packages + GitHub CLI
+RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       docker.io \
@@ -52,7 +64,7 @@ RUN set -eux; \
       nmap \
       ethtool \
       xmlstarlet \
-      github-cli \
+      gh \
       nano; \
     apt-get install -y --no-install-recommends -t trixie \
       mesa-vulkan-drivers \
@@ -63,7 +75,7 @@ RUN set -eux; \
     ln -sf /usr/bin/fdfind /usr/local/bin/fd; \
     rm -rf /var/lib/apt/lists/*
 
-# 2) Android platform tools
+# 3) Android platform tools
 RUN set -eux; \
     mkdir -p /opt/android; \
     wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip -O /tmp/platform-tools.zip; \
@@ -72,12 +84,12 @@ RUN set -eux; \
     ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot; \
     rm -f /tmp/platform-tools.zip
 
-# 3) npm globals
+# 4) npm globals
 RUN set -eux; \
     npm install -g @tobilu/qmd mcporter @openai/codex; \
-    chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd
+    chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd || true
 
-# 4) system Python helpers
+# 5) system Python helpers
 RUN set -eux; \
     pip3 install --break-system-packages \
       uv \
@@ -90,15 +102,16 @@ RUN set -eux; \
       tenacity \
       pyyaml
 
-# 5) Whisper in isolated venv
+# 6) Whisper in isolated venv
 RUN set -eux; \
     python3 -m venv "${WHISPER_VENV}"; \
     "${WHISPER_VENV}/bin/pip" install --upgrade pip setuptools wheel; \
     "${WHISPER_VENV}/bin/pip" install openai-whisper; \
     ln -sf "${WHISPER_VENV}/bin/whisper" /usr/local/bin/whisper
 
-# 6) Quick smoke checks
+# 7) Quick smoke checks
 RUN set -eux; \
+    gh --version; \
     qmd --version; \
     mcporter --version; \
     whisper --help >/dev/null; \
