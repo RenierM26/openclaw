@@ -138,7 +138,8 @@ RUN set -eux; \
 # 8) Prepare Linuxbrew directory
 RUN set -eux; \
     mkdir -p /home/linuxbrew/.linuxbrew; \
-    chown -R node:node /home/linuxbrew
+    mkdir -p /home/node/.cache/Homebrew; \
+    chown -R node:node /home/linuxbrew /home/node/.cache
 
 # 9) Install Linuxbrew as node user
 USER node
