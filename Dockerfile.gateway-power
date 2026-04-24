@@ -8,24 +8,31 @@ ENV ANDROID_PLATFORM_TOOLS=/opt/android/platform-tools
 ENV WHISPER_VENV=/opt/whisper-venv
 ENV PATH="${WHISPER_VENV}/bin:${ANDROID_PLATFORM_TOOLS}:${PATH}"
 
-# 1) APT sources: Debian Trixie for Mesa/Vulkan + official GitHub CLI repo
+# 1) APT sources: Debian Trixie for Mesa/Vulkan + official GitHub CLI + official Docker CLI
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends ca-certificates curl gnupg; \
-    echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
     mkdir -p -m 755 /etc/apt/keyrings; \
+    echo 'deb http://deb.debian.org/debian trixie main contrib non-free-firmware' > /etc/apt/sources.list.d/trixie.list; \
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-      | gpg --dearmor -o /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
-    chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      | gpg --dearmor -o /etc/apt/keyrings/githubcli.gpg; \
+    chmod go+r /etc/apt/keyrings/githubcli.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli.gpg] https://cli.github.com/packages stable main" \
       > /etc/apt/sources.list.d/github-cli.list; \
+    curl -fsSL https://download.docker.com/linux/debian/gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
+    chmod go+r /etc/apt/keyrings/docker.gpg; \
+    . /etc/os-release; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian ${VERSION_CODENAME} stable" \
+      > /etc/apt/sources.list.d/docker.list; \
     rm -rf /var/lib/apt/lists/*
 
-# 2) Base OS packages + GitHub CLI
+# 2) Base OS packages + GitHub CLI + Docker CLI
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-      docker.io \
+      docker-ce-cli \
+      gh \
       git \
       curl \
       wget \
@@ -64,7 +71,6 @@ RUN set -eux; \
       nmap \
       ethtool \
       xmlstarlet \
-      gh \
       nano; \
     apt-get install -y --no-install-recommends -t trixie \
       mesa-vulkan-drivers \
@@ -109,8 +115,9 @@ RUN set -eux; \
     "${WHISPER_VENV}/bin/pip" install openai-whisper; \
     ln -sf "${WHISPER_VENV}/bin/whisper" /usr/local/bin/whisper
 
-# 7) Quick smoke checks
+# 7) Smoke checks
 RUN set -eux; \
+    docker --version; \
     gh --version; \
     qmd --version; \
     mcporter --version; \
