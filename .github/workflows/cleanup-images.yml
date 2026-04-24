@@ -23,10 +23,14 @@ jobs:
           - openclaw-sandbox-browser
 
     steps:
-      - name: Delete old untagged package versions
+      - name: Delete old container package versions
         uses: actions/delete-package-versions@v5
         with:
           package-name: ${{ matrix.package }}
           package-type: container
           min-versions-to-keep: 5
-          delete-only-untagged-versions: true
+          delete-only-untagged-versions: false
+          ignore-versions: |
+            latest
+            weekly
+            bookworm-slim
