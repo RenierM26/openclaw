@@ -167,7 +167,6 @@ RUN set -eux; \
 # Optional: install brew packages here, still as node
 RUN set -eux; \
     brew install \
-      steipete/tap/camsnap \
       openhue/cli/openhue-cli \
       yakitrak/yakitrak/obsidian-cli
 
@@ -188,7 +187,6 @@ RUN set -eux; \
     blogwatcher --help >/dev/null; \
     gifgrep --help >/dev/null; \
     sonos --help >/dev/null; \
-    camsnap --help >/dev/null; \
     openhue --help >/dev/null; \
     obsidian-cli --help >/dev/null; \
     brew --version
