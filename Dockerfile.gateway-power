@@ -178,12 +178,12 @@ RUN set -eux; \
     whisper --help >/dev/null; \
     adb version; \
     openclaw-chromium --version; \
-    brew --version
     tmux -V; \
     clawhub --version || clawhub --help >/dev/null; \
     oracle --version || oracle --help >/dev/null; \
     blogwatcher --help >/dev/null; \
     gifgrep --help >/dev/null; \
     sonos --help >/dev/null; \
+    brew --version
 
 USER node
