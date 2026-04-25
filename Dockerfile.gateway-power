@@ -165,7 +165,11 @@ RUN set -eux; \
     brew analytics off
 
 # Optional: install brew packages here, still as node
-# RUN brew install yq
+RUN set -eux; \
+    brew install \
+      steipete/tap/camsnap \
+      openhue/cli/openhue-cli \
+      yakitrak/yakitrak/obsidian-cli
 
 USER root
 
@@ -184,6 +188,9 @@ RUN set -eux; \
     blogwatcher --help >/dev/null; \
     gifgrep --help >/dev/null; \
     sonos --help >/dev/null; \
+    camsnap --help >/dev/null; \
+    openhue --help >/dev/null; \
+    obsidian-cli --help >/dev/null; \
     brew --version
 
 USER node
