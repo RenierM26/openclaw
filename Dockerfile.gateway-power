@@ -47,6 +47,8 @@ RUN set -eux; \
       jq \
       ffmpeg \
       ripgrep \
+      tmux \
+      golang-go \
       fd-find \
       fzf \
       rsync \
@@ -100,10 +102,21 @@ RUN set -eux; \
     ln -sf /opt/android/platform-tools/fastboot /usr/local/bin/fastboot; \
     rm -f /tmp/platform-tools.zip
 
-# 4) npm globals
+# 4a) npm globals
 RUN set -eux; \
-    npm install -g @tobilu/qmd mcporter @openai/codex; \
+    npm install -g \
+      @tobilu/qmd \
+      mcporter \
+      @openai/codex \
+      clawhub \
+      @steipete/oracle; \
     chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd || true
+
+# 4b) Go-based skill CLIs
+RUN set -eux; \
+    GOBIN=/usr/local/bin go install github.com/Hyaxia/blogwatcher/cmd/blogwatcher@latest; \
+    GOBIN=/usr/local/bin go install github.com/steipete/gifgrep/cmd/gifgrep@latest; \
+    GOBIN=/usr/local/bin go install github.com/steipete/sonoscli/cmd/sonos@latest
 
 # 5) system Python helpers
 RUN set -eux; \
@@ -152,7 +165,10 @@ RUN set -eux; \
     brew analytics off
 
 # Optional: install brew packages here, still as node
-# RUN brew install yq
+RUN set -eux; \
+    brew install \
+      openhue/cli/openhue-cli \
+      yakitrak/yakitrak/obsidian-cli
 
 USER root
 
@@ -165,6 +181,14 @@ RUN set -eux; \
     whisper --help >/dev/null; \
     adb version; \
     openclaw-chromium --version; \
+    tmux -V; \
+    clawhub --version || clawhub --help >/dev/null; \
+    oracle --version || oracle --help >/dev/null; \
+    blogwatcher --help >/dev/null; \
+    gifgrep --help >/dev/null; \
+    sonos --help >/dev/null; \
+    openhue --help >/dev/null; \
+    obsidian-cli --help >/dev/null; \
     brew --version
 
 USER node
