@@ -130,7 +130,19 @@ RUN set -eux; \
       msal \
       rich \
       tenacity \
-      pyyaml
+      pyyaml \
+      ruff \
+      mypy \
+      pyright \
+      pytest \
+      pytest-asyncio \
+      pytest-cov \
+      pytest-mock \
+      coverage \
+      tox \
+      pre-commit \
+      types-requests \
+      types-PyYAML
 
 # 5b) uv-based skill CLIs
 RUN set -eux; \
