@@ -118,7 +118,7 @@ RUN set -eux; \
     GOBIN=/usr/local/bin go install github.com/steipete/gifgrep/cmd/gifgrep@latest; \
     GOBIN=/usr/local/bin go install github.com/steipete/sonoscli/cmd/sonos@latest
 
-# 5) system Python helpers
+# 5a) system Python helpers
 RUN set -eux; \
     pip3 install --break-system-packages \
       uv \
@@ -130,6 +130,13 @@ RUN set -eux; \
       rich \
       tenacity \
       pyyaml
+
+# 5b) uv-based skill CLIs
+RUN set -eux; \
+ UV_TOOL_DIR=/opt/openclaw-tools/uv \
+ UV_TOOL_BIN_DIR=/usr/local/bin \
+ UV_LINK_MODE=copy \
+ uv tool install nano-pdf
 
 # 6) Whisper in isolated venv
 RUN set -eux; \
@@ -189,6 +196,7 @@ RUN set -eux; \
     sonos --help >/dev/null; \
     openhue --help >/dev/null; \
     obsidian-cli --help >/dev/null; \
+    nano-pdf version; \
     brew --version
 
 USER node
