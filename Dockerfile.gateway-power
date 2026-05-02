@@ -116,7 +116,8 @@ RUN set -eux; \
 RUN set -eux; \
     GOBIN=/usr/local/bin go install github.com/Hyaxia/blogwatcher/cmd/blogwatcher@latest; \
     GOBIN=/usr/local/bin go install github.com/steipete/gifgrep/cmd/gifgrep@latest; \
-    GOBIN=/usr/local/bin go install github.com/steipete/sonoscli/cmd/sonos@latest
+    GOBIN=/usr/local/bin go install github.com/steipete/sonoscli/cmd/sonos@latest; \
+    GOBIN=/usr/local/bin go install github.com/steipete/blucli/cmd/blu@latest
 
 # 5a) system Python helpers
 RUN set -eux; \
@@ -175,7 +176,8 @@ RUN set -eux; \
 RUN set -eux; \
     brew install \
       openhue/cli/openhue-cli \
-      yakitrak/yakitrak/obsidian-cli
+      yakitrak/yakitrak/obsidian-cli \
+      steipete/tap/songsee
 
 USER root
 
@@ -197,6 +199,8 @@ RUN set -eux; \
     openhue --help >/dev/null; \
     obsidian-cli --help >/dev/null; \
     nano-pdf version; \
+    blu --help >/dev/null; \
+    songsee --help >/dev/null; \
     brew --version
 
 USER node
