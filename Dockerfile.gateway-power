@@ -107,7 +107,6 @@ RUN set -eux; \
     npm install -g \
       @tobilu/qmd \
       mcporter \
-      @openai/codex \
       clawhub \
       @steipete/oracle; \
     chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd || true
