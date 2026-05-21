@@ -14,7 +14,7 @@ ENV HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew
 ENV HOMEBREW_NO_ANALYTICS=1
 ENV HOMEBREW_NO_AUTO_UPDATE=1
 
-ENV PATH="${WHISPER_VENV}/bin:${ANDROID_PLATFORM_TOOLS}:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+ENV PATH="/home/node/.openclaw/npm/node_modules/.bin:/home/node/.openclaw/npm/.bin:${WHISPER_VENV}/bin:${ANDROID_PLATFORM_TOOLS}:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 
 # 1) APT sources
 RUN set -eux; \
