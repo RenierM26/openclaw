@@ -184,10 +184,7 @@ RUN set -eux; \
     brew analytics off
 
 # Optional: install brew packages here, still as node
-RUN set -eux; \
-    brew install \
-      openhue/cli/openhue-cli \
-      steipete/tap/songsee
+
 
 USER root
 
@@ -206,10 +203,8 @@ RUN set -eux; \
     blogwatcher --help >/dev/null; \
     gifgrep --help >/dev/null; \
     sonos --help >/dev/null; \
-    openhue --help >/dev/null; \
     nano-pdf version; \
     blu --help >/dev/null; \
-    songsee --help >/dev/null; \
     brew --version
 
 USER node
