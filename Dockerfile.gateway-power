@@ -184,10 +184,7 @@ RUN set -eux; \
     brew analytics off
 
 # Optional: install brew packages here, still as node
-RUN set -eux; \
-    brew install \
-      openhue/cli/openhue-cli \
-      steipete/tap/songsee
+
 
 USER root
 
