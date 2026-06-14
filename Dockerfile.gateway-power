@@ -83,6 +83,7 @@ RUN set -eux; \
       xmlstarlet \
       nano \
       file \
+      binutils-multiarch \
       locales; \
     apt-get install -y --no-install-recommends -t trixie \
       mesa-vulkan-drivers \
