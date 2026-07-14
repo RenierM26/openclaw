@@ -153,9 +153,14 @@ RUN set -eux; \
  uv tool install nano-pdf
 
 # 6) Whisper in isolated venv
+ARG PYTORCH_ROCM_INDEX=https://download.pytorch.org/whl/rocm6.3
+
 RUN set -eux; \
     python3 -m venv "${WHISPER_VENV}"; \
     "${WHISPER_VENV}/bin/pip" install --upgrade pip setuptools wheel; \
+    "${WHISPER_VENV}/bin/pip" install \
+      torch \
+      --index-url "${PYTORCH_ROCM_INDEX}"; \
     "${WHISPER_VENV}/bin/pip" install openai-whisper; \
     ln -sf "${WHISPER_VENV}/bin/whisper" /usr/local/bin/whisper
 
