@@ -106,7 +106,6 @@ RUN set -eux; \
 # 4a) npm globals
 RUN set -eux; \
     npm install -g \
-      @tobilu/qmd \
       mcporter \
       clawhub \
       @steipete/oracle; \
@@ -199,7 +198,6 @@ USER root
 RUN set -eux; \
     docker --version; \
     gh --version; \
-    qmd --version; \
     mcporter --version; \
     whisper --help >/dev/null; \
     adb version; \
