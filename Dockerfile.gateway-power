@@ -35,7 +35,7 @@ RUN set -eux; \
       > /etc/apt/sources.list.d/docker.list; \
     rm -rf /var/lib/apt/lists/*
 
-# 2) Base OS packages + GitHub CLI + Docker CLI
+# 2a) Base OS packages + GitHub CLI + Docker CLI
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -90,9 +90,79 @@ RUN set -eux; \
       vulkan-tools \
       libvulkan-dev \
       libgl1-mesa-dri \
-      glslc; \
+      glslc \
+      spirv-headers; \
     ln -sf /usr/bin/fdfind /usr/local/bin/fd; \
     rm -rf /var/lib/apt/lists/*
+
+# 2b) Vulkan-enabled llama.cpp for local OpenClaw embeddings
+ARG LLAMA_CPP_REF=b10534
+ARG LLAMA_CPP_COMMIT=2b5621094ef383cdcd8428ef6d22efe5df976532
+ARG LLAMA_CPP_BUILD_NUMBER=10534
+
+RUN set -eux; \
+    git clone \
+      --branch "${LLAMA_CPP_REF}" \
+      --depth 1 \
+      https://github.com/ggml-org/llama.cpp.git \
+      /tmp/llama.cpp; \
+    test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "${LLAMA_CPP_COMMIT}"; \
+    cmake \
+      -S /tmp/llama.cpp \
+      -B /tmp/llama.cpp/build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DGGML_VULKAN=ON \
+      -DGGML_NATIVE=OFF \
+      -DGGML_BACKEND_DL=OFF \
+      -DGGML_CCACHE=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DLLAMA_BUILD_NUMBER="${LLAMA_CPP_BUILD_NUMBER}" \
+      -DLLAMA_BUILD_COMMIT=2b5621094 \
+      -DLLAMA_CURL=OFF \
+      -DLLAMA_BUILD_TESTS=OFF \
+      -DLLAMA_BUILD_EXAMPLES=OFF \
+      -DLLAMA_BUILD_UI=OFF \
+      -DLLAMA_BUILD_SERVER=ON; \
+    cmake \
+      --build /tmp/llama.cpp/build \
+      --target llama-server \
+      --parallel "$(nproc)"; \
+    install -m 0755 \
+      /tmp/llama.cpp/build/bin/llama-server \
+      /usr/local/bin/llama-server-vulkan; \
+    rm -rf /tmp/llama.cpp
+
+RUN set -eux; \
+    git clone \
+      --branch "${LLAMA_CPP_REF}" \
+      --depth 1 \
+      https://github.com/ggml-org/llama.cpp.git \
+      /tmp/llama.cpp; \
+    test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "${LLAMA_CPP_COMMIT}"; \
+    cmake \
+      -S /tmp/llama.cpp \
+      -B /tmp/llama.cpp/build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DGGML_VULKAN=ON \
+      -DGGML_NATIVE=OFF \
+      -DGGML_BACKEND_DL=OFF \
+      -DGGML_CCACHE=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DLLAMA_BUILD_NUMBER="${LLAMA_CPP_BUILD_NUMBER}" \
+      -DLLAMA_BUILD_COMMIT=2b5621094 \
+      -DLLAMA_CURL=OFF \
+      -DLLAMA_BUILD_TESTS=OFF \
+      -DLLAMA_BUILD_EXAMPLES=OFF \
+      -DLLAMA_BUILD_UI=OFF \
+      -DLLAMA_BUILD_SERVER=ON; \
+    cmake \
+      --build /tmp/llama.cpp/build \
+      --target llama-server \
+      --parallel "$(nproc)"; \
+    install -m 0755 \
+      /tmp/llama.cpp/build/bin/llama-server \
+      /usr/local/bin/llama-server-vulkan; \
+    rm -rf /tmp/llama.cpp
 
 # 3) Android platform tools
 RUN set -eux; \
@@ -210,5 +280,7 @@ RUN set -eux; \
     nano-pdf version; \
     blu --help >/dev/null; \
     brew --version
+    llama-server-vulkan --version \
+      | grep -F 'build 10534, commit 2b5621094'; \
 
 USER node
