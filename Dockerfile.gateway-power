@@ -1,4 +1,4 @@
-FROM ghcr.io/openclaw/openclaw:latest
+FROM ghcr.io/openclaw/openclaw:2026.9.2
 
 USER root
 
@@ -95,18 +95,30 @@ RUN set -eux; \
     ln -sf /usr/bin/fdfind /usr/local/bin/fd; \
     rm -rf /var/lib/apt/lists/*
 
-# 2b) Vulkan-enabled llama.cpp for local OpenClaw embeddings
-ARG LLAMA_CPP_REF=b10534
-ARG LLAMA_CPP_COMMIT=2b5621094ef383cdcd8428ef6d22efe5df976532
-ARG LLAMA_CPP_BUILD_NUMBER=10534
-
+# 2b) Build the exact llama.cpp release expected by this OpenClaw version
 RUN set -eux; \
+    openclaw_version="$(node -p "require('/app/package.json').version")"; \
+    mkdir -p /tmp/llama-provider; \
+    cd /tmp/llama-provider; \
+    provider_tgz="$(npm pack --silent "@openclaw/llama-cpp-provider@${openclaw_version}")"; \
+    llama_ref="$(tar -xOf "$provider_tgz" package/dist/index.js \
+      | sed -n 's/^const LLAMA_SERVER_RELEASE = "\([^"]*\)";$/\1/p')"; \
+    llama_commit="$(tar -xOf "$provider_tgz" package/dist/index.js \
+      | sed -n 's/^const LLAMA_SERVER_COMMIT = "\([^"]*\)";$/\1/p')"; \
+    test -n "$llama_ref"; \
+    test -n "$llama_commit"; \
+    llama_build="${llama_ref#b}"; \
+    case "$llama_build" in \
+      ''|*[!0-9]*) echo "Invalid llama.cpp release: $llama_ref" >&2; exit 1 ;; \
+    esac; \
+    llama_commit_short="$(printf '%.9s' "$llama_commit")"; \
+    echo "OpenClaw ${openclaw_version} expects llama.cpp ${llama_ref} (${llama_commit_short})"; \
     git clone \
-      --branch "${LLAMA_CPP_REF}" \
+      --branch "$llama_ref" \
       --depth 1 \
       https://github.com/ggml-org/llama.cpp.git \
       /tmp/llama.cpp; \
-    test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "${LLAMA_CPP_COMMIT}"; \
+    test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "$llama_commit"; \
     cmake \
       -S /tmp/llama.cpp \
       -B /tmp/llama.cpp/build \
@@ -116,8 +128,8 @@ RUN set -eux; \
       -DGGML_BACKEND_DL=OFF \
       -DGGML_CCACHE=OFF \
       -DBUILD_SHARED_LIBS=OFF \
-      -DLLAMA_BUILD_NUMBER="${LLAMA_CPP_BUILD_NUMBER}" \
-      -DLLAMA_BUILD_COMMIT=2b5621094 \
+      -DLLAMA_BUILD_NUMBER="$llama_build" \
+      -DLLAMA_BUILD_COMMIT="$llama_commit_short" \
       -DLLAMA_CURL=OFF \
       -DLLAMA_BUILD_TESTS=OFF \
       -DLLAMA_BUILD_EXAMPLES=OFF \
@@ -130,7 +142,11 @@ RUN set -eux; \
     install -m 0755 \
       /tmp/llama.cpp/build/bin/llama-server \
       /usr/local/bin/llama-server-vulkan; \
-    rm -rf /tmp/llama.cpp
+    llama_version="$(llama-server-vulkan --version 2>&1)"; \
+    printf '%s\n' "$llama_version"; \
+    printf '%s\n' "$llama_version" | grep -F "$llama_build"; \
+    printf '%s\n' "$llama_version" | grep -F "$llama_commit_short"; \
+    rm -rf /tmp/llama.cpp /tmp/llama-provider
 
 # 3) Android platform tools
 RUN set -eux; \
@@ -248,9 +264,6 @@ RUN set -eux; \
     nano-pdf version; \
     blu --help >/dev/null; \
     brew --version; \
-    llama_version="$(llama-server-vulkan --version 2>&1)"; \
-    printf '%s\n' "$llama_version"; \
-    printf '%s\n' "$llama_version" | grep -F '10534'; \
-    printf '%s\n' "$llama_version" | grep -F '2b5621094'
+    llama-server-vulkan --version >/dev/null 2>&1
 
 USER node
