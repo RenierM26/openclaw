@@ -132,38 +132,6 @@ RUN set -eux; \
       /usr/local/bin/llama-server-vulkan; \
     rm -rf /tmp/llama.cpp
 
-RUN set -eux; \
-    git clone \
-      --branch "${LLAMA_CPP_REF}" \
-      --depth 1 \
-      https://github.com/ggml-org/llama.cpp.git \
-      /tmp/llama.cpp; \
-    test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "${LLAMA_CPP_COMMIT}"; \
-    cmake \
-      -S /tmp/llama.cpp \
-      -B /tmp/llama.cpp/build \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DGGML_VULKAN=ON \
-      -DGGML_NATIVE=OFF \
-      -DGGML_BACKEND_DL=OFF \
-      -DGGML_CCACHE=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DLLAMA_BUILD_NUMBER="${LLAMA_CPP_BUILD_NUMBER}" \
-      -DLLAMA_BUILD_COMMIT=2b5621094 \
-      -DLLAMA_CURL=OFF \
-      -DLLAMA_BUILD_TESTS=OFF \
-      -DLLAMA_BUILD_EXAMPLES=OFF \
-      -DLLAMA_BUILD_UI=OFF \
-      -DLLAMA_BUILD_SERVER=ON; \
-    cmake \
-      --build /tmp/llama.cpp/build \
-      --target llama-server \
-      --parallel "$(nproc)"; \
-    install -m 0755 \
-      /tmp/llama.cpp/build/bin/llama-server \
-      /usr/local/bin/llama-server-vulkan; \
-    rm -rf /tmp/llama.cpp
-
 # 3) Android platform tools
 RUN set -eux; \
     mkdir -p /opt/android; \
