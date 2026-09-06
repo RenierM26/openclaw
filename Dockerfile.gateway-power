@@ -108,8 +108,7 @@ RUN set -eux; \
     npm install -g \
       mcporter \
       clawhub \
-      @steipete/oracle; \
-    chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd || true
+      @steipete/oracle;
 
 # 4b) Go-based skill CLIs
 RUN set -eux; \
