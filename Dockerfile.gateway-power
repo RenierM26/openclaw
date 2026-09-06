@@ -1,4 +1,4 @@
-FROM ghcr.io/openclaw/openclaw:latest
+FROM ghcr.io/openclaw/openclaw:2026.9.2
 
 USER root
 
@@ -35,7 +35,7 @@ RUN set -eux; \
       > /etc/apt/sources.list.d/docker.list; \
     rm -rf /var/lib/apt/lists/*
 
-# 2) Base OS packages + GitHub CLI + Docker CLI
+# 2a) Base OS packages + GitHub CLI + Docker CLI
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -90,9 +90,63 @@ RUN set -eux; \
       vulkan-tools \
       libvulkan-dev \
       libgl1-mesa-dri \
-      glslc; \
+      glslc \
+      spirv-headers; \
     ln -sf /usr/bin/fdfind /usr/local/bin/fd; \
     rm -rf /var/lib/apt/lists/*
+
+# 2b) Build the exact llama.cpp release expected by this OpenClaw version
+RUN set -eux; \
+    openclaw_version="$(node -p "require('/app/package.json').version")"; \
+    mkdir -p /tmp/llama-provider; \
+    cd /tmp/llama-provider; \
+    provider_tgz="$(npm pack --silent "@openclaw/llama-cpp-provider@${openclaw_version}")"; \
+    llama_ref="$(tar -xOf "$provider_tgz" package/dist/index.js \
+      | sed -n 's/^const LLAMA_SERVER_RELEASE = "\([^"]*\)";$/\1/p')"; \
+    llama_commit="$(tar -xOf "$provider_tgz" package/dist/index.js \
+      | sed -n 's/^const LLAMA_SERVER_COMMIT = "\([^"]*\)";$/\1/p')"; \
+    test -n "$llama_ref"; \
+    test -n "$llama_commit"; \
+    llama_build="${llama_ref#b}"; \
+    case "$llama_build" in \
+      ''|*[!0-9]*) echo "Invalid llama.cpp release: $llama_ref" >&2; exit 1 ;; \
+    esac; \
+    llama_commit_short="$(printf '%.9s' "$llama_commit")"; \
+    echo "OpenClaw ${openclaw_version} expects llama.cpp ${llama_ref} (${llama_commit_short})"; \
+    git clone \
+      --branch "$llama_ref" \
+      --depth 1 \
+      https://github.com/ggml-org/llama.cpp.git \
+      /tmp/llama.cpp; \
+    test "$(git -C /tmp/llama.cpp rev-parse HEAD)" = "$llama_commit"; \
+    cmake \
+      -S /tmp/llama.cpp \
+      -B /tmp/llama.cpp/build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DGGML_VULKAN=ON \
+      -DGGML_NATIVE=OFF \
+      -DGGML_BACKEND_DL=OFF \
+      -DGGML_CCACHE=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DLLAMA_BUILD_NUMBER="$llama_build" \
+      -DLLAMA_BUILD_COMMIT="$llama_commit_short" \
+      -DLLAMA_CURL=OFF \
+      -DLLAMA_BUILD_TESTS=OFF \
+      -DLLAMA_BUILD_EXAMPLES=OFF \
+      -DLLAMA_BUILD_UI=OFF \
+      -DLLAMA_BUILD_SERVER=ON; \
+    cmake \
+      --build /tmp/llama.cpp/build \
+      --target llama-server \
+      --parallel "$(nproc)"; \
+    install -m 0755 \
+      /tmp/llama.cpp/build/bin/llama-server \
+      /usr/local/bin/llama-server-vulkan; \
+    llama_version="$(llama-server-vulkan --version 2>&1)"; \
+    printf '%s\n' "$llama_version"; \
+    printf '%s\n' "$llama_version" | grep -F "$llama_build"; \
+    printf '%s\n' "$llama_version" | grep -F "$llama_commit_short"; \
+    rm -rf /tmp/llama.cpp /tmp/llama-provider
 
 # 3) Android platform tools
 RUN set -eux; \
@@ -108,8 +162,7 @@ RUN set -eux; \
     npm install -g \
       mcporter \
       clawhub \
-      @steipete/oracle; \
-    chown -R node:node /usr/local/lib/node_modules/@tobilu/qmd || true
+      @steipete/oracle;
 
 # 4b) Go-based skill CLIs
 RUN set -eux; \
@@ -210,6 +263,7 @@ RUN set -eux; \
     sonos --help >/dev/null; \
     nano-pdf version; \
     blu --help >/dev/null; \
-    brew --version
+    brew --version; \
+    llama-server-vulkan --version >/dev/null 2>&1
 
 USER node
