@@ -279,8 +279,8 @@ RUN set -eux; \
     sonos --help >/dev/null; \
     nano-pdf version; \
     blu --help >/dev/null; \
-    brew --version
+    brew --version; \
     llama-server-vulkan --version \
-      | grep -F 'build 10534, commit 2b5621094'; \
+      | grep -F 'build 10534, commit 2b5621094'
 
 USER node
