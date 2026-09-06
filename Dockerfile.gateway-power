@@ -248,7 +248,9 @@ RUN set -eux; \
     nano-pdf version; \
     blu --help >/dev/null; \
     brew --version; \
-    llama-server-vulkan --version \
-      | grep -F 'build 10534, commit 2b5621094'
+    llama_version="$(llama-server-vulkan --version 2>&1)"; \
+    printf '%s\n' "$llama_version"; \
+    printf '%s\n' "$llama_version" | grep -F '10534'; \
+    printf '%s\n' "$llama_version" | grep -F '2b5621094'
 
 USER node
