@@ -26,16 +26,16 @@ jobs:
         image:
           - name: openclaw-sandbox
             script: ./scripts/sandbox-setup.sh
-            local_tag: openclaw-sandbox:bookworm-slim
-            remote_tag: ghcr.io/renierm26/openclaw-sandbox:bookworm-slim
+            local_tag: openclaw-sandbox:trixie-slim
+            remote_tag: ghcr.io/renierm26/openclaw-sandbox:trixie-slim
           - name: openclaw-sandbox-common
             script: ./scripts/sandbox-common-setup.sh
-            local_tag: openclaw-sandbox-common:bookworm-slim
-            remote_tag: ghcr.io/renierm26/openclaw-sandbox-common:bookworm-slim
+            local_tag: openclaw-sandbox-common:trixie-slim
+            remote_tag: ghcr.io/renierm26/openclaw-sandbox-common:trixie-slim
           - name: openclaw-sandbox-browser
             script: ./scripts/sandbox-browser-setup.sh
-            local_tag: openclaw-sandbox-browser:bookworm-slim
-            remote_tag: ghcr.io/renierm26/openclaw-sandbox-browser:bookworm-slim
+            local_tag: openclaw-sandbox-browser:trixie-slim
+            remote_tag: ghcr.io/renierm26/openclaw-sandbox-browser:trixie-slim
 
     steps:
       - name: Clone upstream OpenClaw
