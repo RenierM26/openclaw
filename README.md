@@ -8,9 +8,9 @@ Gateway image:
 - ghcr.io/renierm26/openclaw-gateway-power:latest
 
 Sandbox images:
-- ghcr.io/renierm26/openclaw-sandbox:bookworm-slim
-- ghcr.io/renierm26/openclaw-sandbox-common:bookworm-slim
-- ghcr.io/renierm26/openclaw-sandbox-browser:bookworm-slim
+- ghcr.io/renierm26/openclaw-sandbox:trixie-slim
+- ghcr.io/renierm26/openclaw-sandbox-common:trixie-slim
+- ghcr.io/renierm26/openclaw-sandbox-browser:trixie-slim
 
 ## 1. Publish the gateway image from GitHub Actions
 
