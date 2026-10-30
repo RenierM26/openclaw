@@ -200,6 +200,9 @@ RUN set -eux; \
       pre-commit \
       types-requests \
       pyelftools \
+      av \
+      numpy \
+      scipy \
       types-PyYAML
 
 # 5b) uv-based skill CLIs
