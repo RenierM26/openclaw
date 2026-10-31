@@ -90,6 +90,9 @@ RUN set -eux; \
       vulkan-tools \
       libvulkan-dev \
       libgl1-mesa-dri \
+      libegl1 \
+      libegl-mesa0 \
+      libgles2 \
       glslc \
       mesa-va-drivers \
       vainfo \
