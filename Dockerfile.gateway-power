@@ -104,15 +104,17 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # 2b) Build the exact llama.cpp release expected by this OpenClaw version
+# Provider constants may live in hashed chunks, including hidden .setup files.
 RUN set -eux; \
     openclaw_version="$(node -p "require('/app/package.json').version")"; \
     mkdir -p /tmp/llama-provider; \
     cd /tmp/llama-provider; \
     provider_tgz="$(npm pack --silent "@openclaw/llama-cpp-provider@${openclaw_version}")"; \
-    llama_ref="$(tar -xOf "$provider_tgz" package/dist/index.js \
-      | sed -n 's/^const LLAMA_SERVER_RELEASE = "\([^"]*\)";$/\1/p')"; \
-    llama_commit="$(tar -xOf "$provider_tgz" package/dist/index.js \
-      | sed -n 's/^const LLAMA_SERVER_COMMIT = "\([^"]*\)";$/\1/p')"; \
+    tar -xzf "$provider_tgz"; \
+    llama_ref="$(find package/dist -type f \( -name '*.js' -o -name '*.mjs' \) \
+      -exec sed -n 's/^const LLAMA_SERVER_RELEASE = "\([^"]*\)";$/\1/p' {} + | sort -u)"; \
+    llama_commit="$(find package/dist -type f \( -name '*.js' -o -name '*.mjs' \) \
+      -exec sed -n 's/^const LLAMA_SERVER_COMMIT = "\([^"]*\)";$/\1/p' {} + | sort -u)"; \
     test -n "$llama_ref"; \
     test -n "$llama_commit"; \
     llama_build="${llama_ref#b}"; \
